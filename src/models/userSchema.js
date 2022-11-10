@@ -2,12 +2,15 @@ const validator = require("validator");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const userRoleValues = {
+  ADMIN: "admin",
+  Customer: "user",
+};
 
 const userSchema = new mongoose.Schema({
   Role: {
     type: String,
-    enum: ["user", "admin"],
-    default: "user",
+    default: userRoleValues.Customer,
   },
   name: {
     type: String,
@@ -85,3 +88,4 @@ userSchema.pre("save", async function (next) {
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
+module.exports.Roles = userRoleValues;
