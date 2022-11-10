@@ -4,7 +4,7 @@ const UserController = require("../controller/userController");
 const auth = require("../middleware/userAuth");
 const router = express.Router();
 
-//sign Up
+/*Sign Up **/
 router.post(
   "/signup",
   body("name").isString().withMessage("Name Must Be String "),
@@ -14,9 +14,9 @@ router.post(
     .withMessage("Password Must Be 8 Letter"),
   UserController.newUser
 );
-//login
+/* log In **/
 router.post("/login", UserController.logIn);
-// logOut
+//*Lot out form dev*/
 router.post("/logout", auth, UserController.logout);
 //logOut From all Dev
 router.post("/logoutAll", auth, UserController.logoutAll);

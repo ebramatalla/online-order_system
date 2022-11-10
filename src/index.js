@@ -2,7 +2,7 @@ const express = require("express");
 require("../src/dataBase/mongoose");
 const UserRouter = require("./routers/userRoute");
 const MealRouter = require("./routers/mealRoute");
-const authRouter = require("./routers/auth");
+const authRouter = require("./routers/authRoute");
 const adminRouter = require("./routers/adminRoute");
 const app = express();
 const port = process.env.PORT || 3000;

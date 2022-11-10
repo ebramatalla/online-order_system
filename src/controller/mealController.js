@@ -1,4 +1,10 @@
 const Meal = require("../models/foodSchema");
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @returns Added Meal
+ */
 const addMeal = async (req, res) => {
   const meal = new Meal({
     name: req.body["name"],
@@ -16,6 +22,12 @@ const addMeal = async (req, res) => {
     res.status(400).send(e);
   }
 };
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @returns edit Meal
+ */
 const editMeal = async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "price", "description"];
@@ -39,6 +51,12 @@ const editMeal = async (req, res) => {
     res.send(e);
   }
 };
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @returns all meals
+ */
 const getAllMeal = async (req, res) => {
   try {
     const allMeal = await Meal.find({});
@@ -47,6 +65,13 @@ const getAllMeal = async (req, res) => {
     res.status(500).send(e);
   }
 };
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @returns if deleted or not
+ *
+ */
 const deleteMeal = async (req, res) => {
   try {
     const deletedMeal = await Meal.findByIdAndDelete(req.params.id);

@@ -1,11 +1,20 @@
 const express = require("express");
-const { body } = require("express-validator");
+const adminController = require("../controller/adminController");
 const UserController = require("../controller/userController");
 const auth = require("../middleware/userAuth");
-const role = require("../middleware/isRole");
-
 const { Roles } = require("../models/userSchema");
-
 const router = express.Router();
-router.get("/allUser", auth, role([Roles.ADMIN]), UserController.getAll);
+const IsRole = require("../middleware/isRole");
+/**this route return all User  */
+router.get("/allUser", auth, IsRole([Roles.ADMIN]), UserController.getAll);
+/**
+ * Chang status of order
+ */
+router.patch(
+  "/editStatus",
+  auth,
+  IsRole([Roles.ADMIN]),
+  adminController.editStatus
+);
+
 module.exports = router;

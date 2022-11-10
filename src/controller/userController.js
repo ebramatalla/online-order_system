@@ -1,4 +1,6 @@
 const User = require("../models/userSchema");
+const Order = require("../models/orderSchema");
+const Meal = require("../models/foodSchema");
 /**
  * Add New User
  */
@@ -23,7 +25,11 @@ const newUser = async (req, res, next) => {
     res.status(400).send(e);
   }
 };
-// log in
+/**
+ *
+ * @param {email ,password} req
+ * @param {*} res
+ */
 const logIn = async (req, res) => {
   try {
     const user = await User.findByCredentials(
@@ -36,7 +42,12 @@ const logIn = async (req, res) => {
     res.status(400).send(e);
   }
 };
-// get all user
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @return promise pf all user
+ */
 const getAll = async (req, res) => {
   try {
     const allUsers = await User.find({});
@@ -45,7 +56,12 @@ const getAll = async (req, res) => {
     res.status(400).send();
   }
 };
-// edit User By Id
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @returns edited user
+ */
 const EditUser = async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password"];
@@ -66,11 +82,21 @@ const EditUser = async (req, res) => {
     res.status(400).send(e);
   }
 };
-// Get All user
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @return the user logged in
+ */
 const me = async (req, res) => {
   res.status(200).send(req.user);
 };
-//Delete User By id
+/**
+ *
+ * @param {id from req} req
+ * @param {*} res
+ * deleted user
+ */
 const deleteUser = async (req, res) => {
   try {
     await req.user.remove();
@@ -79,25 +105,12 @@ const deleteUser = async (req, res) => {
     res.status(500).send(e);
   }
 };
-// mark as admin
-// edit it letter
-// const makeAdmin = async (req, res) => {
-//   try {
-//     const user = await User.findById(req.params.id);
-//     if (!user) {
-//       return res.status(404).send("User Not Found");
-//     }
-//     if (user.Role) {
-//       return res.status(400).send("this is already Admin");
-//     }
-//     user.admin = true;
-//     await user.save();
-//     res.status(200).send(user);
-//   } catch (e) {
-//     return res.status(400).send(e);
-//   }
-// };
-// logOut
+
+/**
+ *
+ * @param {id from req} req
+ * @param {*} res
+ */
 const logout = async (req, res) => {
   try {
     req.user.tokens = req.user.tokens.filter((token) => {
@@ -110,7 +123,7 @@ const logout = async (req, res) => {
     res.status(500).send();
   }
 };
-// logout form all devices
+/* logout form all devices**/
 const logoutAll = async (req, res) => {
   try {
     req.user.tokens = [];
@@ -118,6 +131,32 @@ const logoutAll = async (req, res) => {
     res.send();
   } catch (e) {
     res.status(500).send();
+  }
+};
+/**
+ *
+ * @param {id of user and Meal} req
+ * @param {*} res
+ */
+const makeOrder = async (req, res) => {
+  const order = new Order({
+    ...req.body,
+    Customer: req.user._id,
+  });
+
+  try {
+    const meal = await Meal.findById(req.body);
+
+    if (!meal) {
+      return res.status(404).send({ error: "This meal Is Invalid" });
+    }
+    await order.save();
+    res.send(await (await order.populate("Customer")).populate("Meal"));
+  } catch (error) {
+    if (error.name == "CastError") {
+      return res.status(404).send({ error: "This meal Is Invalid" });
+    }
+    res.status(404).send(error);
   }
 };
 
@@ -130,4 +169,5 @@ module.exports = {
   logout,
   logoutAll,
   getAll,
+  makeOrder,
 };
