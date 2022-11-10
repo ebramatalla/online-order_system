@@ -2,6 +2,9 @@ const User = require("../models/userSchema");
 const Order = require("../models/orderSchema");
 const Meal = require("../models/foodSchema");
 const { validationResult } = require("express-validator");
+const confirmationCode = require("../Emails/account");
+const { use } = require("../routers/mealRoute");
+const { response } = require("express");
 /**
  * Add New User
  */
@@ -10,7 +13,9 @@ const newUser = async (req, res, next) => {
     name: req.body["name"],
     email: req.body["email"],
     password: req.body["password"],
+    confirmationCode: confirmationCode.randomNumber,
   });
+  confirmationCode.Confirmation(req.body["email"]);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -159,7 +164,7 @@ const makeOrder = async (req, res) => {
   });
 
   try {
-    const meal = await Meal.findById(req.body);
+    const meal = await Meal.findById(req.body.Meal);
 
     if (!meal) {
       return res.status(404).send({ error: "This meal Is Invalid" });
@@ -173,6 +178,34 @@ const makeOrder = async (req, res) => {
     res.status(404).send(error);
   }
 };
+const confEmail = async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (user.Verified) {
+    return res.status(400).send({ message: "already Verified" });
+  }
+  if (user.confirmationCode == req.body["confEmail"]) {
+    user.Verified = true;
+    await user.save();
+    return res.status(200).send({ Message: "Verified" });
+  } else {
+    return res.status(400).send({ Message: "Invalid Code" });
+  }
+};
+const resendCode = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user.Verified) {
+      return res.status(400).send({ Message: "Already Verified " });
+    }
+    const ResendCode = confirmationCode.randomNumber;
+    user.confirmationCode = ResendCode;
+    await user.save();
+    confirmationCode.Confirmation(req.user.email);
+    res.status(200).send({ Message: "Sended" });
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};
 
 module.exports = {
   newUser,
@@ -184,4 +217,6 @@ module.exports = {
   logoutAll,
   getAll,
   makeOrder,
+  confEmail,
+  resendCode,
 };

@@ -15,6 +15,14 @@ const editStatus = async (req, res) => {
     res.send(error);
   }
 };
+const allOrders = async (req, res) => {
+  try {
+    const order = await Order.find({}).populate("Customer").populate("Meal");
+
+    res.send(order);
+  } catch (error) {}
+};
 module.exports = {
   editStatus,
+  allOrders,
 };

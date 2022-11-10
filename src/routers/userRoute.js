@@ -26,4 +26,11 @@ router.get("/user", auth, Controller.me);
 router.delete("/user", auth, Controller.deleteUser);
 // make order
 router.post("/makeOrder", auth, IsRole([Roles.Customer]), Controller.makeOrder);
+router.post("/confEmail", auth, IsRole([Roles.Customer]), Controller.confEmail);
+router.post(
+  "/resendCode",
+  auth,
+  IsRole([Roles.Customer]),
+  Controller.resendCode
+);
 module.exports = router;

@@ -16,5 +16,6 @@ router.patch(
   IsRole([Roles.ADMIN]),
   adminController.editStatus
 );
+router.get("/allOrder", auth, IsRole([Roles.ADMIN]), adminController.allOrders);
 
 module.exports = router;

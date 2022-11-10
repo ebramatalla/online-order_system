@@ -31,7 +31,12 @@ router.patch(
   Controller.editMeal
 );
 // get all meal
-router.get("/meal", auth, IsRole([Roles.ADMIN]), Controller.getAllMeal);
+router.get(
+  "/meal",
+  auth,
+  IsRole([Roles.ADMIN, Roles.Customer]),
+  Controller.getAllMeal
+);
 // delete meal
 router.delete("/meal/:id", auth, IsRole([Roles.ADMIN]), Controller.deleteMeal);
 
