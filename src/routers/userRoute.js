@@ -9,7 +9,17 @@ const { Roles } = require("../models/userSchema");
 const router = express.Router();
 
 //Edit User
-router.patch("/user", auth, Controller.EditUser);
+router.patch(
+  "/user",
+  body("name").optional().isString().withMessage("Enter Valid Name"),
+  body("email").optional().isEmail().withMessage("enter Valid Email"),
+  body("password")
+    .optional()
+    .isLength({ min: 8 })
+    .withMessage("Password Must Be 8 Letter"),
+  auth,
+  Controller.EditUser
+);
 //get all Users
 router.get("/user", auth, Controller.me);
 //delete user

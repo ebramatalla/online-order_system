@@ -1,4 +1,6 @@
 const Meal = require("../models/foodSchema");
+const { validationResult } = require("express-validator");
+
 /**
  *
  * @param {*} req
@@ -11,6 +13,11 @@ const addMeal = async (req, res) => {
     description: req.body["description"],
     price: req.body["price"],
   });
+  // Finds the validation errors in this request and wraps them in an object with handy functions
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const existMeal = await Meal.findOne({ name: meal.name });
     if (existMeal) {
@@ -29,6 +36,11 @@ const addMeal = async (req, res) => {
  * @returns edit Meal
  */
 const editMeal = async (req, res) => {
+  // Finds the validation errors in this request and wraps them in an object with handy functions
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "price", "description"];
   const isValidOperation = updates.every((update) =>

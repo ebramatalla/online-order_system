@@ -1,6 +1,7 @@
 const User = require("../models/userSchema");
 const Order = require("../models/orderSchema");
 const Meal = require("../models/foodSchema");
+const { validationResult } = require("express-validator");
 /**
  * Add New User
  */
@@ -10,6 +11,10 @@ const newUser = async (req, res, next) => {
     email: req.body["email"],
     password: req.body["password"],
   });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const existingUser = await User.findOne({ email: user.email });
     if (existingUser) {
@@ -31,6 +36,10 @@ const newUser = async (req, res, next) => {
  * @param {*} res
  */
 const logIn = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const user = await User.findByCredentials(
       req.body.email,
@@ -63,6 +72,11 @@ const getAll = async (req, res) => {
  * @returns edited user
  */
 const EditUser = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password"];
   const isValidOperation = updates.every((update) =>

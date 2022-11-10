@@ -1,5 +1,5 @@
 const express = require("express");
-const { body } = require("express-validator");
+const { body, validationResult } = require("express-validator");
 const UserController = require("../controller/userController");
 const auth = require("../middleware/userAuth");
 const router = express.Router();
@@ -15,7 +15,14 @@ router.post(
   UserController.newUser
 );
 /* log In **/
-router.post("/login", UserController.logIn);
+router.post(
+  "/login",
+  body("email").isEmail().withMessage("Please enter valid Email"),
+  body("password")
+    .isLength({ min: 8 })
+    .withMessage("Please enter valid Password"),
+  UserController.logIn
+);
 //*Lot out form dev*/
 router.post("/logout", auth, UserController.logout);
 //logOut From all Dev
