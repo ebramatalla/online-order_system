@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const StatusOfOrder = {
+  pending: "pending",
   notDelivered: "on my way",
   Delivered: "delivered",
 };
@@ -17,8 +18,16 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: StatusOfOrder.notDelivered,
+    default: StatusOfOrder.pending,
   },
+  orderNumber: {
+    type: Number,
+    required: true,
+  },
+
+  // add number of order
+  // add Order Num (track)
+  // available or not
 });
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

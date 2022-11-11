@@ -18,7 +18,6 @@ const editStatus = async (req, res) => {
 const allOrders = async (req, res) => {
   try {
     const order = await Order.find({}).populate("Customer").populate("Meal");
-
     res.send(order);
   } catch (error) {}
 };

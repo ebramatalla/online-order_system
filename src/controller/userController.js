@@ -1,10 +1,7 @@
 const User = require("../models/userSchema");
 const Order = require("../models/orderSchema");
-const Meal = require("../models/foodSchema");
 const { validationResult } = require("express-validator");
 const confirmationCode = require("../Emails/account");
-const { use } = require("../routers/mealRoute");
-const { response } = require("express");
 /**
  * Add New User
  */
@@ -51,7 +48,7 @@ const logIn = async (req, res) => {
       req.body.password
     );
     const token = await user.generateAuthToken();
-    res.send({ user, token });
+    res.send({ token });
   } catch (e) {
     res.status(400).send(e);
   }
@@ -158,18 +155,25 @@ const logoutAll = async (req, res) => {
  * @param {*} res
  */
 const makeOrder = async (req, res) => {
-  const order = new Order({
-    ...req.body,
-    Customer: req.user._id,
-  });
-
   try {
-    const meal = await Meal.findById(req.body.Meal);
-
-    if (!meal) {
-      return res.status(404).send({ error: "This meal Is Invalid" });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+
+    const order = new Order({
+      ...req.body,
+      Customer: req.user._id,
+    });
+
+    // const meal = await Meal.findById(req.body.Meal);
+
+    // if (!meal) {
+    //   return res.status(404).send({ error: "This meal Is Invalid" });
+    // }
+
     await order.save();
+
     res.send(await (await order.populate("Customer")).populate("Meal"));
   } catch (error) {
     if (error.name == "CastError") {

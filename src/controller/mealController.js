@@ -1,5 +1,6 @@
-const Meal = require("../models/foodSchema");
+const Meal = require("../models/mealSchema");
 const { validationResult } = require("express-validator");
+const { userRoleValues } = require("../models/userSchema");
 
 /**
  *
@@ -8,21 +9,25 @@ const { validationResult } = require("express-validator");
  * @returns Added Meal
  */
 const addMeal = async (req, res) => {
-  const meal = new Meal({
-    name: req.body["name"],
-    description: req.body["description"],
-    price: req.body["price"],
-  });
   // Finds the validation errors in this request and wraps them in an object with handy functions
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const meal = new Meal({
+      name: req.body["name"],
+      description: req.body["description"],
+      price: req.body["price"],
+    });
+
     const existMeal = await Meal.findOne({ name: meal.name });
     if (existMeal) {
       return res.status(400).send({ message: "Meal Is Added Before" });
     }
+
     await meal.save();
     res.send(meal);
   } catch (e) {
@@ -42,7 +47,7 @@ const editMeal = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["name", "price", "description"];
+  const allowedUpdates = ["name", "price", "description", "isAvailable"];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );
@@ -51,6 +56,7 @@ const editMeal = async (req, res) => {
   }
   try {
     const meal = await Meal.findById(req.params.id);
+
     updates.forEach((update) => {
       meal[update] = req.body[update];
     });
@@ -71,12 +77,32 @@ const editMeal = async (req, res) => {
  */
 const getAllMeal = async (req, res) => {
   try {
-    const allMeal = await Meal.find({});
-    res.status(200).send(allMeal);
+    const { role } = req.user;
+    let query = {};
+    let selectionText = "";
+    switch (role) {
+      case userRoleValues.ADMIN:
+        query = {};
+        selectionText = "";
+        break;
+      case userRoleValues.Customer:
+        query = {
+          isAvailable: true,
+        };
+        selectionText = "";
+        break;
+    }
+
+    const totalMeals = await Meal.find(query).countDocuments();
+
+    const allMeal = await Meal.find(query).select(selectionText).limit(10);
+
+    res.status(200).send({ allMeal, totalMeals });
   } catch (e) {
     res.status(500).send(e);
   }
 };
+
 /**
  *
  * @param {*} req
@@ -84,16 +110,16 @@ const getAllMeal = async (req, res) => {
  * @returns if deleted or not
  *
  */
-const deleteMeal = async (req, res) => {
-  try {
-    const deletedMeal = await Meal.findByIdAndDelete(req.params.id);
-    if (!deletedMeal) {
-      return res.status(404).send({ Error: "CanNot found This Meal" });
-    }
-    res.status(200).send({ message: "Deleted successfully", deletedMeal });
-  } catch (e) {
-    res.status(500).send(e);
-  }
-};
+// const deleteMeal = async (req, res) => {
+//   try {
+//     const deletedMeal = await Meal.findByIdAndDelete(req.params.id);
+//     if (!deletedMeal) {
+//       return res.status(404).send({ Error: "CanNot found This Meal" });
+//     }
+//     res.status(200).send({ message: "Deleted successfully", deletedMeal });
+//   } catch (e) {
+//     res.status(500).send(e);
+//   }
+// };
 
-module.exports = { addMeal, editMeal, getAllMeal, deleteMeal };
+module.exports = { addMeal, editMeal, getAllMeal };

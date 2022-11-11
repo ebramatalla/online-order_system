@@ -2,15 +2,18 @@ const validator = require("validator");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+var uniqueValidator = require("mongoose-unique-validator");
+
 const userRoleValues = {
   ADMIN: "admin",
   Customer: "user",
 };
+
 require("dotenv").config();
 
 const userSchema = new mongoose.Schema(
   {
-    Role: {
+    role: {
       type: String,
       default: userRoleValues.Customer,
     },
@@ -109,5 +112,8 @@ userSchema.pre("save", async function (next) {
 });
 const User = mongoose.model("User", userSchema);
 
+userSchema.plugin(uniqueValidator);
+
 module.exports = User;
 module.exports.Roles = userRoleValues;
+module.exports.userRoleValues = userRoleValues;

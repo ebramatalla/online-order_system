@@ -15,6 +15,11 @@ const mealSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  isAvailable: {
+    type: Boolean,
+    default: true,
+  },
+  // add image
 });
 const Meal = mongoose.model("Meal", mealSchema);
 module.exports = Meal;

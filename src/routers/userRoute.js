@@ -5,6 +5,7 @@ const Controller = require("../controller/userController");
 const IsRole = require("../middleware/isRole");
 
 const { Roles } = require("../models/userSchema");
+const Meal = require("../models/mealSchema");
 
 const router = express.Router();
 
@@ -22,11 +23,34 @@ router.patch(
 );
 //get all Users
 router.get("/user", auth, Controller.me);
+
 //delete user
 router.delete("/user", auth, Controller.deleteUser);
+
 // make order
-router.post("/makeOrder", auth, IsRole([Roles.Customer]), Controller.makeOrder);
+router.post(
+  "/makeOrder",
+  auth,
+  IsRole([Roles.Customer]),
+  [
+    body("mealId")
+      .isMongoId()
+      .custom(async (value, { req }) => {
+        const meal = await Meal.findOne({
+          _id: value,
+          //isAvailable :true
+        });
+        if (!meal) {
+          throw new Error("This meal not found");
+        }
+        // req.meal = meal;
+      }),
+  ],
+  Controller.makeOrder
+);
+
 router.post("/confEmail", auth, IsRole([Roles.Customer]), Controller.confEmail);
+
 router.post(
   "/resendCode",
   auth,
